@@ -1,4 +1,4 @@
-# DrumStation firmware emulator
+# DrumStation Emulator
 
 A Linux desktop emulator for the Novation DrumStation. It runs the original v1.2 controller and DSP firmware to produce audio from MIDI. The desktop panel exposes both TR-808 and TR-909 voices, and a separate step sequencer provides 27 tracks, eight patterns, up to 64 steps, parameter locks, and internal or external MIDI clock.
 
@@ -10,7 +10,7 @@ A Linux desktop emulator for the Novation DrumStation. It runs the original v1.2
 
 ## Requirements
 
-Linux, a C++20 compiler, CMake 3.20 or newer, ALSA development headers/library, Python 3 with Tkinter, and an ALSA audio device. The shipped artwork and ordinary GUI use need no Python packages. Pillow is needed only to regenerate the artwork. `xvfb-run` enables the optional layout test in headless environments.
+Linux, a C++20 compiler, CMake 3.20 or newer, ALSA development headers/library, Python 3 with Tkinter, and an ALSA audio device. The generated panel and sequencer artwork is included in `tools/assets/`; no Pillow installation is needed to build or run the release. `xvfb-run` enables the optional layout test in headless environments.
 
 On Debian or Ubuntu, the relevant packages are `build-essential cmake libasound2-dev python3 python3-tk`.
 
