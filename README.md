@@ -8,6 +8,10 @@ A Linux desktop emulator for the Novation DrumStation. It runs the original v1.2
 
 ![DrumStation step sequencer](screenshots/step-sequencer.png)
 
+## Download
+
+Get the [Linux x86_64 release archive](https://github.com/amorgan101010/drumstation-emulator/releases/latest). It includes the built engine, GUI, and artwork. Extract it, add your own ROMs as described in its `README.txt`, then run `python3 tools/gui.py` from the extracted folder.
+
 ## Requirements
 
 Linux, a C++20 compiler, CMake 3.20 or newer, ALSA development headers/library, Python 3 with Tkinter, and an ALSA audio device. The panel and sequencer artwork is included in `tools/assets/`.
