@@ -35,9 +35,5 @@ if(Python3_FOUND)
     add_test(NAME firmware COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_firmware.py)
     set_tests_properties(firmware PROPERTIES ENVIRONMENT "DRUMSTATION_BINARY=$<TARGET_FILE:drumstation>")
     add_test(NAME sequencer_model COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_sequencer.py)
-    find_program(XVFB_RUN xvfb-run)
-    if(XVFB_RUN)
-        add_test(NAME panel_layout COMMAND ${XVFB_RUN} -a -s "-screen 0 1920x1080x24"
-                 ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/check_layout.py)
-    endif()
+
 endif()

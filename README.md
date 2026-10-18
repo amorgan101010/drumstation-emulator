@@ -10,7 +10,7 @@ A Linux desktop emulator for the Novation DrumStation. It runs the original v1.2
 
 ## Requirements
 
-Linux, a C++20 compiler, CMake 3.20 or newer, ALSA development headers/library, Python 3 with Tkinter, and an ALSA audio device. The generated panel and sequencer artwork is included in `tools/assets/`; no Pillow installation is needed to build or run the release. `xvfb-run` enables the optional layout test in headless environments.
+Linux, a C++20 compiler, CMake 3.20 or newer, ALSA development headers/library, Python 3 with Tkinter, and an ALSA audio device. The panel and sequencer artwork is included in `tools/assets/`.
 
 On Debian or Ubuntu, the relevant packages are `build-essential cmake libasound2-dev python3 python3-tk`.
 

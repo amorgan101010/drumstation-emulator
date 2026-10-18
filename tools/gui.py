@@ -118,8 +118,7 @@ CARD_GAP, CARD_TOP, CARD_H, CARD_TITLE_H = 8, 161, 175, 27
 MAIN_R, MINI_R, HEADER_R = 20, 10, 27
 TICK = 7  # the printed tick ring reaches this far beyond a knob's radius
 
-# Fixed header and frame geometry. tools/render_panel.py paints the plate from
-# these same numbers, so the artwork cannot drift from the hit rectangles.
+# Fixed header and frame geometry matching the bundled artwork.
 CHASSIS = (14, 12, PANEL_W - 14, PANEL_H - 12)
 SCREWS = tuple((x, y) for x in (28, PANEL_W - 28) for y in (31, PANEL_H - 31))
 HEADER = (46, 29, PANEL_W - 46, 136)
@@ -242,7 +241,7 @@ def layout_fingerprint() -> str:
 
 
 class Skin:
-    """Pre-rendered panel artwork from tools/render_panel.py, loaded with Tk alone."""
+    """Bundled panel artwork, loaded with Tk alone."""
 
     def __init__(self, master: tk.Misc):
         self.meta = json.loads((ASSETS / "skin.json").read_text())
@@ -1876,7 +1875,7 @@ def main() -> int:
     if any(not (ASSETS / name).exists() for name in
            ("plate.png", "sprites.png", "skin.json", "sequencer.png",
             "sequencer_full.png", "sequencer_all.png")):
-        print("Missing panel artwork: run python3 tools/render_panel.py (needs Pillow)", file=sys.stderr); return 1
+        print("Missing panel artwork in tools/assets; restore the complete release checkout", file=sys.stderr); return 1
     if args.check:
         print("Realtime performance panel prerequisites available."); return 0
     root = tk.Tk(className="drumstation"); root.title("DrumStation — Firmware Panel"); root.geometry(f"{PANEL_W}x{PANEL_H}"); root.minsize(1020, 650)
