@@ -1,0 +1,22 @@
+# Local firmware, generated output, and user data must never enter this repo.
+/roms/
+/build/
+/build-*/
+/.venv/
+__pycache__/
+*.pyc
+*.wav
+*.mid
+*.run/
+*.bin
+*.rom
+*.u15
+*.u28
+*.zip
+*.tgz
+*.tar
+*.7z
+*.log
+*.json
+!tools/assets/skin.json
+!screenshots/*.png
