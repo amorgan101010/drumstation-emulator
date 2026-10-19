@@ -1,6 +1,6 @@
 # DrumStation Emulator
 
-A Linux desktop emulator for the Novation DrumStation. It runs the original v1.2 controller and DSP firmware to produce audio from MIDI. The desktop panel exposes both TR-808 and TR-909 voices, and a separate step sequencer provides 27 tracks, eight patterns, up to 64 steps, parameter locks, and internal or external MIDI clock.
+A desktop emulator for the Novation DrumStation. It runs the original v1.2 controller and DSP firmware to produce audio from MIDI. The Linux Tk panel exposes both TR-808 and TR-909 voices, and a separate step sequencer provides 27 tracks, eight patterns, up to 64 steps, parameter locks, and internal or external MIDI clock. A JUCE VST3 and standalone build is also available with a basic status editor.
 
 **Firmware is not included.** You must supply your own legally obtained `v1.2.u15` and `v1.2.u28` ROM images. The import tool checks their sizes and SHA-1 hashes. This project is unaffiliated with Novation.
 
@@ -30,6 +30,10 @@ python3 tools/gui.py
 The ZIP must contain `v1.2.u15` and `v1.2.u28` at its top level. The imported images go into the ignored `roms/` directory. You can instead place those two files there and run `python3 tools/roms.py` to verify them. Run `ctest --test-dir build --output-on-failure` for tests; firmware dependent tests need the ROMs.
 
 The panel starts the realtime engine. **I/O SETUP** selects the audio device, MIDI input, and channel. It creates an ALSA sequencer port named **DrumStation MIDI In** for DAW routing. Click **SEQUENCER** at the bottom of the panel to open the step sequencer. The panel saves settings under `$XDG_CONFIG_HOME/drumstation/` and its emulated EEPROM under `$XDG_DATA_HOME/drumstation/`, or the corresponding `~/.config` and `~/.local/share` directories.
+
+### JUCE VST3 and standalone
+
+The GitHub Actions build workflow produces VST3 and JUCE standalone artifacts for Linux, macOS, and Windows. To build locally, check out JUCE 8.0.8 beside this repository and run `cmake -S . -B build-juce -DDRUMSTATION_PLUGIN=ON -DJUCE_DIR=../JUCE`, followed by `cmake --build build-juce --config Release`. The plugin looks for `v1.2.u15` and `v1.2.u28` in `DRUMSTATION_ROM_DIR` when set, otherwise in the operating system's application data directory under `DrumStation/roms`. The ROM files are never included in build artifacts. The JUCE editor currently shows ROM status; the full panel and sequencer are available in the Linux Tk application.
 
 You can also use the command line:
 
