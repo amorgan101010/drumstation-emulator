@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <numbers>
 #include <cstdint>
 #include <vector>
 
@@ -52,7 +53,7 @@ struct MasterFx {
         auto pole=[rate](double seconds) { return float(1-std::exp(-1/(seconds*rate))); };
         smoothing=pole(0.02); attack=pole(0.002); release=pole(0.15); recovery=pole(0.01); matching=pole(3);
         damping=float(std::pow(0.25,1/scale));
-        rumble=float(1-std::exp(-2*M_PI*180/rate));
+        rumble=float(1-std::exp(-2*std::numbers::pi*180/rate));
         low=0;
         reduction=0; limit=1; power_in=power_out=0;
         used=false;
