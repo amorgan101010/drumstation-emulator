@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Derived from MAME MN1880, copyright AJR. See THIRD_PARTY.md.
 #include "mn1880.h"
+#include <string>
 mn1880_device::mn1880_device()
  : m_cpum(0), m_ustate(microstate::UNKNOWN), m_da(0), m_tmp1(0), m_tmp2(0),
  m_output_queue_state(0xff), m_icount(0), m_if(0), m_irq(0), m_mmu_bank{0,0,0,0}, m_mmu_enable(0)
@@ -2215,4 +2216,3 @@ void mn1880_device::execute_run()
 		}
 	}
 }
-
