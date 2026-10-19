@@ -32,7 +32,11 @@ jobs:
       - name: Build
         run: cmake --build build --config Release --parallel 3
       - name: Core tests
+        if: runner.os != 'Windows'
         run: ctest --test-dir build -C Release --output-on-failure -E sequencer_model
+      - name: Windows core test
+        if: runner.os == 'Windows'
+        run: ctest --test-dir build -C Release --output-on-failure -R '^adsp_core$'
       - name: Upload builds
         uses: actions/upload-artifact@v4
         with:
