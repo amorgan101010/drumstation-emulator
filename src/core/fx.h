@@ -34,12 +34,14 @@ struct MasterFx {
     uint8_t knobs[2]{}; // compressor, reverb: 0..127
     bool tight_room=false; // which of the reverb's two characters
     float compress=0, reverb=0; // the knobs as 0..1, smoothed against zipper noise
-    float smoothing=0, attack=0, release=0, recovery=0, matching=0, damping=0, rumble=0;
+    float smoothing=0, attack=0, release=0, fast_attack=0, slow_release=0;
+    float matching=0, damping=0, rumble=0;
     float tight=0; // tight_room as 0..1, smoothed
     float low=0;   // the lows a tight room's send leaves out
     float reduction=0; // compressor gain reduction in dB
     float limit=1;     // limiter gain
-    float power_in=0, power_out=0; // recent power into and out of the compressor, before make-up
+    float power_in=0, power_out=0, power_final=0, power_reference=0;
+    float post_makeup=1, post_rate=0;
     bool used=false;
     MasterFx() { set_rate(44100); }
     void set_rate(unsigned rate) {
@@ -51,11 +53,13 @@ struct MasterFx {
                 allpasses[side][i]=Line{std::vector<float>(std::lround((allpass_frames[i]+side*spread_frames)*scale)),0,0};
         }
         auto pole=[rate](double seconds) { return float(1-std::exp(-1/(seconds*rate))); };
-        smoothing=pole(0.02); attack=pole(0.002); release=pole(0.15); recovery=pole(0.01); matching=pole(3);
+        smoothing=pole(0.02); attack=pole(0.002); release=pole(0.15); matching=pole(3);
+        fast_attack=pole(0.0002); slow_release=pole(0.25);
+        post_rate=pole(1.5);
         damping=float(std::pow(0.25,1/scale));
         rumble=float(1-std::exp(-2*std::numbers::pi*180/rate));
         low=0;
-        reduction=0; limit=1; power_in=power_out=0;
+        reduction=0; limit=post_makeup=1; power_in=power_out=power_final=power_reference=0;
         used=false;
     }
     void set_knob(unsigned which,uint8_t value) { knobs[which]=value; }
@@ -67,7 +71,7 @@ struct MasterFx {
         if(used) {
             for(auto &side : combs) for(auto &line : side) { std::fill(line.data.begin(),line.data.end(),0.f); line.store=0; }
             for(auto &side : allpasses) for(auto &line : side) std::fill(line.data.begin(),line.data.end(),0.f);
-            compress=reverb=reduction=0; limit=1; power_in=power_out=low=0;
+            compress=reverb=reduction=0; limit=post_makeup=1; power_in=power_out=power_final=power_reference=low=0;
             used=false;
         }
         return true;
@@ -108,32 +112,39 @@ struct MasterFx {
         }
         float mix=blend(0.6f*reverb*reverb,0.92f*reverb*std::sqrt(reverb));
         left+=wet[0]*mix; right+=wet[1]*mix;
-        // Compressor: the knob lowers the threshold to -24 dBFS (quickly at
-        // first, so the low end of its travel already bites) and raises
-        // the ratio to 6:1. One detector drives both channels, so the stereo
-        // image stays where it was.
-        if(compress<=1e-4f) { power_in=power_out=0; return; }
-        float threshold=-24*std::sqrt(compress), slope=1-1/(1+5*compress);
+        // At high settings, catch the attack as well as the body. A longer
+        // release lets the gain rise between drum hits for an audible pump.
+        // One detector drives both channels to preserve the stereo image.
+        if(compress<=1e-4f) { power_in=power_out=power_final=power_reference=0; post_makeup=1; return; }
+        float character=compress*compress;
+        float threshold=-(24*std::sqrt(compress)+6*character);
+        float slope=1-1/(1+5*compress+4*character);
         float peak=std::max(std::fabs(left),std::fabs(right));
         float over=(peak>0.03f ? 20*std::log10(peak/32768) : -120.f)-threshold;
         float target=over>0 ? over*slope : 0;
-        reduction+=(target-reduction)*(target>reduction ? attack : release);
+        float attack_rate=attack+(fast_attack-attack)*character;
+        float release_rate=release+(slow_release-release)*character;
+        reduction+=(target-reduction)*(target>reduction ? attack_rate : release_rate);
         if(reduction<1e-6f) reduction=0;
         float gain=std::pow(10.f,-reduction/20);
-        // Make-up gain is whatever puts back the power the last few seconds
-        // lost, so the knob changes the dynamics and not the loudness: no
-        // fixed amount could do that at every boost setting. Both averages
-        // are of power, so loud hits set it and silence leaves it alone.
+        // Match the compressor's output power to the incoming power.
         float power=left*left+right*right;
         power_in+=(power-power_in)*matching;
+        float ref_l=std::clamp(left,-32768.f,32767.f), ref_r=std::clamp(right,-32768.f,32767.f);
+        power_reference+=(ref_l*ref_l+ref_r*ref_r-power_reference)*matching;
         power_out+=(power*gain*gain-power_out)*matching;
         if(power_out<1e-9f) power_in=power_out=0;
-        else gain*=std::min(std::sqrt(power_in/power_out),16.f);
-        // The attack lets a drum's first milliseconds through at the made-up
-        // level. A limiter with no attack time holds those under full scale.
+        else gain*=std::min(std::sqrt(power_in/power_out),64.f)*post_makeup;
+        // Only peaks need limiting. At high COMP settings, recover quickly
+        // so a clipped transient cannot hold the following drum body down.
         float ceiling=peak*gain>32767 ? 32767/(peak*gain) : 1;
-        limit=ceiling<limit ? ceiling : limit+(ceiling-limit)*recovery;
+        limit=ceiling;
         left*=gain*limit; right*=gain*limit;
+        power_final+=(left*left+right*right-power_final)*matching;
+        if(power_reference>1e6f && power_final>1e6f) {
+            float error=std::clamp(std::sqrt(power_reference/power_final)-1.f,-0.2f,0.2f);
+            post_makeup=std::clamp(post_makeup*(1.f+error*post_rate),1.f,4.f);
+        }
     }
 };
 
