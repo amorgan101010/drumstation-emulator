@@ -19,6 +19,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 enable_testing()
 
+add_executable(compressor_level_test tests/compressor_level_test.cpp)
+target_link_libraries(compressor_level_test PRIVATE drumstation_core)
+add_test(NAME compressor_level COMMAND compressor_level_test)
+
 add_executable(adsp_core_test vendor/adsp2181/adsp2181_core_test.c)
 target_link_libraries(adsp_core_test PRIVATE adsp2181)
 add_test(NAME adsp_core COMMAND adsp_core_test)
